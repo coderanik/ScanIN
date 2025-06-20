@@ -16,6 +16,8 @@ export default function Layout({ children }: LayoutProps) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserType | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [navigation, setNavigation] = useState<Array<{ name: string; href: string }>>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const currentUser = getUser();
@@ -24,6 +26,26 @@ export default function Layout({ children }: LayoutProps) {
     if (!isAuthenticated() && !pathname.startsWith('/login') && !pathname.startsWith('/register')) {
       router.push('/login');
     }
+
+    if (currentUser) {
+      if (currentUser.role === 'admin') {
+        setNavigation([
+          { name: 'Dashboard', href: '/admin' },
+          { name: 'Events', href: '/admin/events' },
+          { name: 'Create Event', href: '/admin/events/create' },
+          { name: 'Attendance', href: '/admin/attendance' },
+        ]);
+      } else {
+        setNavigation([
+          { name: 'Dashboard', href: '/student' },
+          { name: 'Events', href: '/student/events' },
+          { name: 'My Registrations', href: '/student/registrations' },
+        ]);
+      }
+    } else {
+      setNavigation([]);
+    }
+    setLoading(false);
   }, [pathname, router]);
 
   const handleLogout = () => {
@@ -36,16 +58,10 @@ export default function Layout({ children }: LayoutProps) {
     return <>{children}</>;
   }
 
-  const navigation = isAdmin() ? [
-    { name: 'Dashboard', href: '/admin' },
-    { name: 'Events', href: '/admin/events' },
-    { name: 'Create Event', href: '/admin/events/create' },
-    { name: 'Attendance', href: '/admin/attendance' },
-  ] : [
-    { name: 'Dashboard', href: '/student' },
-    { name: 'Events', href: '/student/events' },
-    { name: 'My Registrations', href: '/student/registrations' },
-  ];
+  if (loading) {
+    // Optionally, you can return a spinner or skeleton here
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -13,6 +13,11 @@ const attendeeSchema = new mongoose.Schema({
   checkInTime: {
     type: Date,
   },
+  qrCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
 });
 
 const eventSchema = new mongoose.Schema(

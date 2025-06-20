@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QrCode, Camera, Users, Download, Search, X } from 'lucide-react';
+import { QrCode, Camera, Users, Download, Search, X, Calendar, MapPin, Clock, Sparkles } from 'lucide-react';
+
 import { eventService } from '@/services/eventService';
 import { Event, Attendance } from '@/types';
 import QRScanner from '@/components/QRScanner';
@@ -89,47 +90,88 @@ export default function AdminAttendancePage() {
   };
 
   const filteredAttendees = attendees.filter(attendee =>
-    attendee.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    attendee.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (attendee.participantName && attendee.participantName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (attendee.email && attendee.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading attendance data...</p>
         </div>
+      </div>
     );
   }
 
   return (
-      <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Attendance Management</h1>
-          <p className="mt-2 text-gray-600">Scan QR codes and manage event attendance</p>
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
+              <Sparkles className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+            Attendance Management
+          </h1>
+          <p className="mt-3 text-xl text-gray-600 max-w-2xl mx-auto">
+            Streamline your event check-ins with QR code scanning and real-time attendance tracking
+          </p>
         </div>
 
         {/* Event Selection */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Select Event</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+          <div className="flex items-center mb-6">
+            <Calendar className="h-6 w-6 text-blue-600 mr-3" />
+            <h2 className="text-2xl font-bold text-gray-900">Select Event</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <div
                 key={event._id}
                 onClick={() => setSelectedEvent(event)}
-                className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
                   selectedEvent?._id === event._id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl'
+                    : 'bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl border border-gray-100'
                 }`}
               >
-                <h3 className="font-medium text-gray-900">{event.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{event.description}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-gray-500">
-                    {new Date(event.date).toLocaleDateString()} at {event.time}
-                  </span>
-                  <span className="text-xs text-gray-500">{event.location}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <h3 className="font-bold text-lg mb-2">{event.title}</h3>
+                  <p className={`text-sm mb-4 ${selectedEvent?._id === event._id ? 'text-blue-100' : 'text-gray-600'}`}>
+                    {event.description}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>{new Date(event.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>{event.time}</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span>{event.location}</span>
+                    </div>
+                  </div>
+                  <div className={`mt-4 pt-4 border-t ${selectedEvent?._id === event._id ? 'border-white/20' : 'border-gray-200'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Attendees</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        selectedEvent?._id === event._id 
+                          ? 'bg-white/20 text-white' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {event.attendeeCount}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -139,96 +181,113 @@ export default function AdminAttendancePage() {
         {selectedEvent && (
           <>
             {/* QR Scanner Section */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900">
-                  QR Code Scanner - {selectedEvent.title}
-                </h2>
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <QrCode className="h-6 w-6 text-blue-600 mr-3" />
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    QR Code Scanner
+                  </h2>
+                </div>
                 <button
                   onClick={() => setShowScanner(true)}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="group flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  <Camera className="h-5 w-5 mr-2" />
+                  <Camera className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
                   Open Scanner
                 </button>
               </div>
               
-              <div className="bg-gray-50 rounded-lg p-6 text-center">
-                <QrCode className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">
-                  Click "Open Scanner" to start scanning QR codes for attendance
+              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 text-center border border-gray-100">
+                <div className="inline-flex p-4 bg-white rounded-2xl shadow-lg mb-6">
+                  <QrCode className="h-12 w-12 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Scan</h3>
+                <p className="text-gray-600 mb-4">
+                  Click "Open Scanner" to start scanning QR codes for <span className="font-semibold text-blue-600">{selectedEvent.title}</span>
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Make sure to allow camera access when prompted
+                <p className="text-sm text-gray-500 bg-white/60 rounded-lg py-2 px-4 inline-block">
+                  💡 Make sure to allow camera access when prompted
                 </p>
               </div>
             </div>
 
             {/* Attendees List */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+              <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">Attendees</h2>
+                  <div className="flex items-center">
+                    <Users className="h-6 w-6 text-blue-600 mr-3" />
+                    <h2 className="text-2xl font-bold text-gray-900">Attendees</h2>
+                    <span className="ml-3 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {filteredAttendees.length}
+                    </span>
+                  </div>
                   <button
                     onClick={handleExportAttendance}
-                    className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="group flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-2 group-hover:translate-y-1 transition-transform duration-300" />
                     Export
                   </button>
                 </div>
               </div>
 
               {/* Search */}
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <div className="px-8 py-6 bg-gradient-to-r from-gray-50/50 to-blue-50/50 border-b border-gray-200">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search attendees..."
+                    placeholder="Search attendees by name or email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/80 backdrop-blur-sm transition-all duration-300"
                   />
                 </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gray-50/80">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        Participant
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        Contact
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                         QR Code
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                         Check-in Time
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAttendees.map((attendee) => (
-                      <tr key={attendee._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {attendee.participantName}
+                  <tbody className="bg-white/60 divide-y divide-gray-200">
+                    {filteredAttendees.map((attendee, index) => (
+                      <tr key={attendee._id} className="hover:bg-blue-50/50 transition-colors duration-200">
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-4">
+                              {attendee.participantName.charAt(0)}
+                            </div>
+                            <div className="text-sm font-bold text-gray-900">
+                              {attendee.participantName}
+                            </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{attendee.email}</div>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">{attendee.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 font-mono">
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700 font-mono bg-gray-100 px-3 py-1 rounded-lg inline-block">
                             {attendee.qrCode.substring(0, 8)}...
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
                             {new Date(attendee.timeOfAttendance).toLocaleString()}
                           </div>
                         </td>
@@ -239,10 +298,22 @@ export default function AdminAttendancePage() {
               </div>
 
               {filteredAttendees.length === 0 && (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No attendees found</p>
-                  <p className="text-sm text-gray-400">Start scanning QR codes to record attendance</p>
+                <div className="text-center py-16">
+                  <div className="inline-flex p-4 bg-gray-100 rounded-2xl mb-6">
+                    <Users className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">No Attendees Found</h3>
+                  <p className="text-gray-500 mb-4">
+                    {searchTerm ? 'Try adjusting your search terms' : 'Start scanning QR codes to record attendance'}
+                  </p>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Clear Search
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -251,22 +322,22 @@ export default function AdminAttendancePage() {
 
         {/* QR Scanner Modal */}
         {showScanner && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">QR Code Scanner</h3>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">QR Code Scanner</h3>
                 <button
                   onClick={() => setShowScanner(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <X className="h-6 w-6" />
                 </button>
               </div>
-              <QRScanner onScan={handleQRScan} onError={(error) => toast.error(error)} />
-              <div className="mt-4 text-center">
+              <QRScanner onScan={handleQRScan} onError={(error) => alert(error)} />
+              <div className="mt-6 text-center">
                 <button
                   onClick={() => setShowScanner(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-colors"
                 >
                   Close Scanner
                 </button>
@@ -275,5 +346,6 @@ export default function AdminAttendancePage() {
           </div>
         )}
       </div>
+    </div>
   );
-} 
+}

@@ -26,7 +26,7 @@ export interface Event {
 export interface Registration {
   _id: string;
   userId: string;
-  eventId: string;
+  eventId: string | Event;
   qrCode: string;
   checkedIn: boolean;
   registeredAt: string;

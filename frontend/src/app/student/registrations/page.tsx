@@ -50,8 +50,10 @@ export default function StudentRegistrationsPage() {
           {registrations.map((reg) => (
             <div key={reg._id} className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold text-blue-700 mb-2">
-                {reg.eventId?.title || "Event"}
-              </h2>
+                  {typeof reg.eventId === 'object' && 'title' in reg.eventId
+                    ? reg.eventId.title
+                    : 'Event'}
+                </h2>
               <p className="text-gray-600 mb-1">
                 {reg.eventId?.description}
               </p>

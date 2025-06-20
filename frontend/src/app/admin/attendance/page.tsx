@@ -6,7 +6,6 @@ import { eventService } from '@/services/eventService';
 import { Event, Attendance } from '@/types';
 import QRScanner from '@/components/QRScanner';
 import toast from 'react-hot-toast';
-import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 
 export default function AdminAttendancePage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -96,16 +95,13 @@ export default function AdminAttendancePage() {
 
   if (isLoading) {
     return (
-      <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
-      </AuthenticatedLayout>
     );
   }
 
   return (
-    <AuthenticatedLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -279,6 +275,5 @@ export default function AdminAttendancePage() {
           </div>
         )}
       </div>
-    </AuthenticatedLayout>
   );
 } 

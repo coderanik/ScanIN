@@ -20,6 +20,7 @@ export interface Event {
   attendees: string[];
   createdAt: string;
   updatedAt: string;
+  attendeeCount?: number;
 }
 
 export interface Registration {
